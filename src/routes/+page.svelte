@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script>
+	import DdevConfigurator from '$lib/components/ddev-configurator.svelte';
+</script>
+
+<nav>
+	<a href="#">Configurator</a>
+	<a href="#">One command install</a>
+	<a href="#">Headless setups</a>
+</nav>
+
+<DdevConfigurator />
