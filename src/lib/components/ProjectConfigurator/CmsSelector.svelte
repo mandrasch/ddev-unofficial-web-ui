@@ -53,14 +53,19 @@
 </div>
 
 <style>
-	.logo-container {
-		text-align: center;
-		margin-bottom: 2rem;
+	.form-inner {
+		container-type: inline-size;
 	}
+
 	.cms-grid {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 1rem;
+
+		@container (max-width: 599px) {
+			display: grid;
+			grid-template-columns: repeat(1, 1fr);
+		}
 	}
 	.cms-item {
 		position: relative;

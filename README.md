@@ -29,4 +29,3 @@ Beware: Some code provided by ChatGPT
 - [ ] Add url params to share a link to every page?
 - [ ] Add specific CMS version selector install commands?
 - [ ] Add filter field for CMS selector?
-- [ ] Use human readable date format for timestamp

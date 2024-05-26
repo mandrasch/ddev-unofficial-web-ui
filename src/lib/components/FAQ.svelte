@@ -28,3 +28,9 @@
 		</p>
 	</details>
 </div>
+
+<style>
+	summary {
+		cursor: pointer;
+	}
+</style>
