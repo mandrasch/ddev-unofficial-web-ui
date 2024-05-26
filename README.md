@@ -19,5 +19,7 @@ npm run dev
 
 ## TODOs
 
+- [ ] Mobile optimization
+- [ ] Type safety
 - [ ] Add url params to share a link to every page?
-- [ ] Add versions for one command installs?
+- [ ] Add CMS versions for one command installs?
