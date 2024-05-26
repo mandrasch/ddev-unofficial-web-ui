@@ -2,6 +2,8 @@
 
 🚧 Disclaimer: Early preview of a private project, work in progress 🚧
 
+Preview: https://ddev-unofficial-web-ui.vercel.app
+
 Usage in DDEV:
 
 ```
@@ -21,8 +23,10 @@ Beware: Some code provided by ChatGPT
 
 ## TODOs
 
-- [ ] Mobile optimization ⚠️
-- [ ] Accessibility check ⚠️
+- [ ] ⚠️ Mobile optimization
+- [ ] ⚠️ Accessibility check
+- [ ] ⚠️ Add warning when user switches CMS --> resets to defaults
+- [ ] TYPO3 not fully automated yet (webserver is asked)
 - [ ] Add all CMSes
 - [ ] Quality Check for ChatGPT-generated code 🤖
 - [ ] Type safety
