@@ -172,7 +172,7 @@
 			let generatedCommand = `mkdir ${$projectNameWithTimestamp} && \\
 cd ${$projectNameWithTimestamp}/ && \\
 ddev config \\
-	--project-type="${$projectType}" \\ 
+	--project-type="${$projectType}" \\
 	--docroot="${docrootFinal}" \\
 	--php-version="${$phpVersion}" \\
 	${databaseFinalCmd} \\
