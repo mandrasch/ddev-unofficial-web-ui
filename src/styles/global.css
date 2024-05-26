@@ -1,0 +1,29 @@
+html,
+body {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+body {
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		sans-serif,
+		'Apple Color Emoji',
+		'Segoe UI Emoji',
+		Segoe UI Symbol,
+		'Noto Color Emoji';
+}
+
+.container {
+	max-width: 750px;
+	margin: 2rem auto;
+	padding: 2rem;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* TODO: fix it, does not work currently */
+/*pre, pre code{
+    font-family: 'Fira Code';
+}*/

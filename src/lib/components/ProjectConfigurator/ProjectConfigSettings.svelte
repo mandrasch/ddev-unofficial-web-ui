@@ -1,52 +1,66 @@
 <script>
+	// This is used as a child component for ProjectConfigurator,
+	// but it can be also used standalone.
+
+	import { onMount, onDestroy } from 'svelte';
 	import { writable, derived } from 'svelte/store';
+	import { page } from '$app/stores';
+	import Highlight from 'svelte-highlight';
+	import { bash } from 'svelte-highlight/languages';
+	import 'svelte-highlight/styles/github-dark.css';
+
+	// outside props
+	export let selectedCms = null;
+	// Watch for changes in selectedCms prop from outside
+	$: {
+		console.log('Selected CMS changed from outside / onMount', selectedCms);
+		if (selectedCms) {
+			switch (selectedCms) {
+				case 'custom':
+					projectType.set('php');
+					break;
+
+				case 'craftcms':
+					projectType.set(selectedCms);
+					phpVersion.set('8.2');
+					break;
+				case 'kirby':
+					projectType.set('php');
+					phpVersion.set('8.2');
+					databaseType.set('none');
+					break;
+				case 'laravel':
+					projectType.set(selectedCms);
+					phpVersion.set('8.2');
+					break;
+				case 'typo3':
+					projectType.set(selectedCms);
+					phpVersion.set('8.2');
+					break;
+				default:
+					console.error('Selected CMS not mapped yet to project configurator', { selectedCms });
+					break;
+			}
+		}
+	}
+
+	// Cleanup logic
+	onDestroy(() => {
+		projectType.set('php');
+		phpVersion.set('8.2');
+	});
 
 	// Constants for form options
-	const projectTypeMappings = {
-		php: { label: 'php', docroot: '' },
-		backdrop: { label: 'Backdrop', docroot: '' },
-		cakephp: { label: 'CakePHP', docroot: 'webroot' },
-		craftcms: { label: 'Craft CMS', docroot: 'web' },
-		drupal: { label: 'Drupal', docroot: 'web' },
-		laravel: { label: 'Laravel', docroot: 'public' },
-		magento2: { label: 'Magento 2', docroot: 'pub' },
-		shopware6: { label: 'Shopware 6', docroot: 'public' },
-		silverstripe: { label: 'SilverStripe', docroot: 'public' },
-		typo3: { label: 'TYPO3', docroot: 'public' },
-		wordpress: { label: 'WordPress', docroot: '' }
-	};
-	const projectTypes = Object.keys(projectTypeMappings);
-
-	const phpVersions = ['8.3', '8.2', '8.1', '8.0', '7.4', '7.2', '7.1', '7.0', '5.6'];
-
-	const databaseTypeMappings = {
-		mysql: 'MySQL',
-		postgres: 'PostgreSQL',
-		mariadb: 'MariaDB',
-		none: 'None'
-	};
-	const databaseTypes = Object.keys(databaseTypeMappings);
-	const databaseVersions = {
-		mysql: ['8.0', '5.7', '5.5'],
-		postgres: ['16', '15', '14', '13', '12', '11', '9'],
-		mariadb: [
-			'10.11',
-			'10.10',
-			'10.9',
-			'10.8',
-			'10.7',
-			'10.6',
-			'10.5',
-			'10.4',
-			'10.3',
-			'10.2',
-			'10.1',
-			'10.0',
-			'5.5'
-		]
-	};
-
-	const nodejsVersions = ['20.3.1', '20.3', '20', '18', 'custom'];
+	import {
+		projectTypeMappings,
+		projectTypes,
+		phpVersions,
+		databaseTypeMappings,
+		databaseTypes,
+		databaseVersions,
+		webserverTypes,
+		nodejsVersions
+	} from '$lib/stores/configOptions';
 
 	// Form state stores with default values
 	const projectName = writable('my-awesome-project');
@@ -56,6 +70,7 @@
 	const phpVersion = writable('8.2');
 	const databaseType = writable('mysql');
 	const databaseVersion = writable('8.0');
+	const webserverType = writable('nginx-fpm');
 	const nodejsVersion = writable('20.3.1');
 	const customNodejsVersion = writable('');
 	const enableCorepack = writable(false);
@@ -97,7 +112,7 @@
 	);
 
 	// Derived store for bash command
-	const bashCommand = derived(
+	const generatedBashCommand = derived(
 		[
 			projectNameWithTimestamp,
 			projectType,
@@ -105,6 +120,7 @@
 			phpVersion,
 			databaseType,
 			databaseVersion,
+			webserverType,
 			nodejsVersion,
 			customNodejsVersion,
 			enableCorepack,
@@ -117,6 +133,7 @@
 			$phpVersion,
 			$databaseType,
 			$databaseVersion,
+			$webserverType,
 			$nodejsVersion,
 			$customNodejsVersion,
 			$enableCorepack,
@@ -128,7 +145,10 @@
 			// define docroot
 			let docrootFinal = $docroot;
 			if ($projectType !== 'php') {
-				docrootFinal = projectTypeMappings[$projectType].docroot;
+				// use docroot from project types defaults
+				if (projectTypeMappings[$projectType]?.docroot == null) {
+					console.error('No docroot found for projectType ', { $projectType });
+				}
 			}
 
 			let databaseFinalCmd;
@@ -141,11 +161,12 @@
 			let generatedCommand = `mkdir ${$projectNameWithTimestamp} && \\
 cd ${$projectNameWithTimestamp}/ && \\
 ddev config \\
---project-type="${$projectType}" \\ 
---docroot="${docrootFinal}" \\
---php-version="${$phpVersion}" \\
-${databaseFinalCmd} \\
---nodejs-version="${nodejsVersionFinal}" \\\n`;
+	--project-type="${$projectType}" \\ 
+	--docroot="${docrootFinal}" \\
+	--php-version="${$phpVersion}" \\
+	${databaseFinalCmd} \\
+	--webserver-type=${$webserverType} \\
+	--nodejs-version="${nodejsVersionFinal}" \\\n`;
 
 			if ($enableCorepack) {
 				generatedCommand += '--corepack-enable \\\n';
@@ -154,7 +175,47 @@ ${databaseFinalCmd} \\
 				generatedCommand += `--disable-settings-management \\\n`;
 			}
 
-			generatedCommand += `&& ddev start`;
+			generatedCommand += `&& ddev start -y && \\\n`;
+
+			// one command installs (if cms is selected)
+			if (selectedCms != null && selectedCms !== 'custom') {
+				switch (selectedCms) {
+					case 'craftcms':
+						generatedCommand += `ddev composer create -y --no-scripts --no-interaction "craftcms/craft:^5" && \\
+ddev craft install/craft \\
+	--username=admin \\
+	--password=password123 \\
+	--email=admin@example.com \\
+	--site-name=Testsite \\
+	--language=en \\
+	--site-url='$DDEV_PRIMARY_URL' && \\`;
+						break;
+
+					case 'kirby':
+						generatedCommand += `ddev composer create getkirby/starterkit && \\`;
+						break;
+
+					case 'laravel':
+						generatedCommand += `ddev composer create --prefer-dist laravel/laravel:^11 && \\`;
+						break;
+
+					case 'typo3':
+						generatedCommand += `ddev composer create "typo3/cms-base-distribution:^12" && \\
+ddev exec ./vendor/bin/typo3 setup \\
+    --admin-username="admin" \\
+    --admin-user-password="password123" \\
+    --project-name="test" && \\`;
+						break;
+
+					default:
+						console.error('No install command found for ', { selectedCms });
+						break;
+				}
+
+				generatedCommand += `\n`;
+			}
+
+			generatedCommand += `ddev launch`;
 
 			return generatedCommand;
 		}
@@ -163,9 +224,19 @@ ${databaseFinalCmd} \\
 
 <div class="form-container">
 	<div class="form-inner">
-		<div class="logo-container">
-			<img src="/ddev.svg" alt="" />
+		<div class="form-group" style="margin-top:2rem;">
+			<h2 style="text-align:center">Your config command</h2>
+			<!-- <div class="help-text">Paste this into your terminal:</div> -->
+			<div class="highlight-textarea-wrapper">
+				<Highlight language={bash} code={$generatedBashCommand} />
+			</div>
+			<!-- <div class="code-buttons">
+				<button>Copy to clipboard</button>
+				<button>Open in Gitpod</button>
+			</div> -->
 		</div>
+
+		<h3 style="text-align:center;margin-top:2.5rem;">Fine-tune your settings</h3>
 
 		<div class="form-group">
 			<label class="group-label" for="project-name">Project (folder) name</label>
@@ -181,7 +252,8 @@ ${databaseFinalCmd} \\
 			</div>
 		</div>
 
-		<div class="form-group">
+		<!-- Don't show project type and docroot for pre-selected CMS, this is for power users -->
+		<div class="form-group" class:hide={selectedCms != null && selectedCms != 'custom'}>
 			<div class="group-label">Project Type</div>
 			<p>
 				<small
@@ -201,7 +273,8 @@ ${databaseFinalCmd} \\
 			</div>
 		</div>
 
-		<div class="form-group">
+		<!-- Don't show project type and docroot for pre-selected CMS, this is for power users -->
+		<div class="form-group" class:hide={selectedCms != null && selectedCms != 'custom'}>
 			{#if $projectType === 'php'}
 				<label for="docroot" class="group-label">Docroot (optional):</label>
 				<input
@@ -282,8 +355,20 @@ ${databaseFinalCmd} \\
 		{/if}
 
 		<div class="form-group">
+			<div class="group-label">Webserver type</div>
+			<div class="radio-row">
+				{#each webserverTypes as type}
+					<label>
+						<input type="radio" name="webserverType" value={type} bind:group={$webserverType} />
+						{type}
+					</label>
+				{/each}
+			</div>
+		</div>
+
+		<div class="form-group">
 			<div class="group-label">Node.js Version</div>
-			<div class="radio-group">
+			<div class="radio-row">
 				{#each nodejsVersions as version}
 					<label>
 						<input type="radio" name="nodejs-version" value={version} bind:group={$nodejsVersion} />
@@ -293,7 +378,7 @@ ${databaseFinalCmd} \\
 				{#if $nodejsVersion === 'custom'}
 					<input
 						type="text"
-						placeholder="Custom Node.js Version, e.g. 22.2.01, 22.2, 22"
+						placeholder="Custom Node.js Version, e.g. 22.2.01, 22.2 or 22"
 						bind:value={$customNodejsVersion}
 					/>
 				{/if}
@@ -306,7 +391,7 @@ ${databaseFinalCmd} \\
 			<div class="form-group" style="margin-top:1rem;">
 				<div class="checkbox-group">
 					<label>
-						<input type="checkbox" bind:checked={$enableCorepack} /> Enable corepack for Node.JS
+						<input type="checkbox" bind:checked={$enableCorepack} /> Enable corepack for Node.js
 					</label>
 					<label>
 						<input type="checkbox" bind:checked={$disableSettingsManagement} /> Disable settings management
@@ -314,54 +399,19 @@ ${databaseFinalCmd} \\
 				</div>
 			</div>
 		</details>
-
-		<div class="form-group" style="margin-top:2rem;">
-			<h2 style="text-align:center">Your config command</h2>
-			<textarea readonly class="bash-command" rows="10">{$bashCommand}</textarea>
-		</div>
-
-		<div class="help-text help-text--blue">
-			There are many more config options, see <a
-				href="https://ddev.readthedocs.io/en/stable/users/configuration/config/"
-				target="_blank">Config Options</a
-			> as well as "ddev help config". You can also change your configuration in the file ".ddev/config.yaml".
-		</div>
-
-		<div class="faq" style="margin-top:3rem;">
-			<details>
-				<summary>Vite support?</summary>
-			</details>
-
-			<details>
-				<summary>Gitpod support?</summary>
-			</details>
-		</div>
 	</div>
 </div>
 
 <style>
+	.hide {
+		display: none !important;
+	}
+
 	.form-container {
-		font-family:
-			ui-sans-serif,
-			system-ui,
-			sans-serif,
-			'Apple Color Emoji',
-			'Segoe UI Emoji',
-			Segoe UI Symbol,
-			'Noto Color Emoji';
-		max-width: 600px;
-		margin: 0 auto;
-
-		background: white;
-		border-radius: 8px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
 		container-type: inline-size;
 	}
 
 	.form-inner {
-		padding: 3rem;
-
 		@container (max-width: 599px) {
 			padding: 1rem;
 		}
@@ -374,8 +424,6 @@ ${databaseFinalCmd} \\
 
 	.help-text {
 		font-size: 0.8rem;
-		padding: 0.6rem 0.75rem;
-		margin: 1rem 0;
 		background-color: #fefefe;
 		border-color: #fdfdfe;
 		border: 1px solid transparent;
@@ -383,11 +431,15 @@ ${databaseFinalCmd} \\
 	}
 
 	.help-text.help-text--blue {
+		padding: 0.6rem 0.75rem;
+		margin: 0.5rem 0 1rem 0;
 		background-color: #cce5ff;
 		border-color: #b8daff;
 	}
 
 	.help-text.help-text--yellow {
+		padding: 0.6rem 0.75rem;
+		margin: 0.5rem 0 1rem 0;
 		background-color: #fff3cd;
 		border-color: #ffeeba;
 	}
