@@ -23,6 +23,8 @@
 				case 'craftcms':
 					projectType.set(selectedCms);
 					phpVersion.set('8.2');
+					databaseType.set('mysql');
+					databaseVersion.set('8.0');
 					break;
 				case 'kirby':
 					projectType.set('php');
@@ -32,10 +34,14 @@
 				case 'laravel':
 					projectType.set(selectedCms);
 					phpVersion.set('8.2');
+					databaseType.set('mysql');
+					databaseVersion.set('8.0');
 					break;
 				case 'typo3':
 					projectType.set(selectedCms);
 					phpVersion.set('8.2');
+					databaseType.set('mysql');
+					databaseVersion.set('8.0');
 					break;
 				default:
 					console.error('Selected CMS not mapped yet to project configurator', { selectedCms });
