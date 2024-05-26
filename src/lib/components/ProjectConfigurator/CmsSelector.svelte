@@ -20,6 +20,11 @@
 		// Add more cmss as needed
 	];
 
+	/**
+	 * Selects a CMS based on its ID.
+	 *
+	 * @param {string | null} id
+	 */
 	function selectCMS(id) {
 		// update internal store
 		selectedCms.set(id);
@@ -33,7 +38,7 @@
 
 <div class="form-inner">
 	<div class="cms-grid">
-		{#each cmsTypes as cms}
+		{#each cmsTypes as cms (cms.id)}
 			<label class="cms-item">
 				<input
 					type="radio"

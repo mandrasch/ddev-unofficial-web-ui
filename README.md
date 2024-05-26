@@ -26,9 +26,10 @@ Beware: Some code provided by ChatGPT
 - [ ] ⚠️ Mobile optimization
 - [ ] ⚠️ Accessibility check
 - [ ] ⚠️ Add warning when user switches CMS --> resets to defaults
+- [ ] Quality Check for ChatGPT-generated code 🤖
+- [ ] Is `writable`neeeded after all?
 - [ ] TYPO3 not fully automated yet (webserver is asked)
 - [ ] Add all CMSes
-- [ ] Quality Check for ChatGPT-generated code 🤖
 - [ ] Type safety
 - [ ] Add url params to share a link to every page?
 - [ ] Add specific CMS version selector install commands?

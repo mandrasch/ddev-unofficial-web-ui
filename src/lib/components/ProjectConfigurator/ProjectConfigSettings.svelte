@@ -2,9 +2,8 @@
 	// This is used as a child component for ProjectConfigurator,
 	// but it can be also used standalone.
 
-	import { onMount, onDestroy } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { writable, derived } from 'svelte/store';
-	import { page } from '$app/stores';
 	import Highlight from 'svelte-highlight';
 	import { bash } from 'svelte-highlight/languages';
 	import 'svelte-highlight/styles/github-dark.css';
@@ -13,7 +12,9 @@
 	export let selectedCms = null;
 	// Watch for changes in selectedCms prop from outside
 	$: {
-		console.log('Selected CMS changed from outside', selectedCms);
+		console.log('[ProjectConfigSettings.svelte] Selected CMS changed from outside', {
+			selectedCms
+		});
 
 		// Reset defaults when another CMS is selected, user might have changed a lot of settings
 		resetDefaults();
@@ -176,7 +177,7 @@
 			$enableCorepack,
 			$disableSettingsManagement
 		]) => {
-			console.log('regenerate bash command', $projectType);
+			console.log('[ProjectConfigSettings.svelte] Regenerate bash command triggered');
 
 			const nodejsVersionFinal =
 				$nodejsVersion === 'custom' ? $customNodejsVersion : $nodejsVersion;
@@ -186,7 +187,6 @@
 				if (projectTypeMappings[$projectType]?.docroot == null) {
 					console.error('No docroot found for projectType ', { $projectType });
 				} else {
-					console.log(projectTypeMappings[$projectType].docroot);
 					docrootFinal = projectTypeMappings[$projectType].docroot;
 				}
 			}

@@ -3,9 +3,16 @@
 	import CmsSelector from '$lib/components/ProjectConfigurator/CmsSelector.svelte';
 	import ProjectConfigSettings from '$lib/components/ProjectConfigurator/ProjectConfigSettings.svelte'; // Assuming this is the correct path
 
+	/**
+	 * @type {string|null}
+	 */
 	let selectedCms;
+
 	function handleCmsChange(event) {
-		console.log('received change', { selectedCms: event.detail.value });
+		console.log('[index] Received change event from CmsSelector.svelte', {
+			event,
+			selectedCms: event.detail.value
+		});
 		selectedCms = event.detail.value;
 	}
 </script>

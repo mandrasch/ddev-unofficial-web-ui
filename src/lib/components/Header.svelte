@@ -4,9 +4,12 @@
 
 <header>
 	<div class="header-inner">
-		<a href="/" class="logo-container">
-			<img src="/ddev.svg" alt="" />
-		</a>
+		<div class="logo-with-subline">
+			<a href="/" class="logo-container">
+				<img src="/ddev.svg" alt="" />
+			</a>
+			<span class="subline">unofficial web UI experiment</span>
+		</div>
 
 		<nav>
 			<a href="/">Project Configurator</a>
@@ -56,5 +59,13 @@
 			margin-top: 1rem;
 			flex-direction: column;
 		}
+	}
+
+	.logo-with-subline {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 0.5rem;
 	}
 </style>
