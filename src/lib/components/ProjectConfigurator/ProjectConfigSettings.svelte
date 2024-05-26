@@ -117,7 +117,12 @@
 		}
 	);
 
-	// Derived store for bash command
+	// Helper function which safely adds another command with line break after it
+	function appendCommand(command, line) {
+		return `${command}${line.trim()} && \\\n`;
+	}
+
+	// Derived store for the generated command
 	const generatedBashCommand = derived(
 		[
 			projectNameWithTimestamp,
@@ -150,10 +155,8 @@
 			const nodejsVersionFinal =
 				$nodejsVersion === 'custom' ? $customNodejsVersion : $nodejsVersion;
 
-			// define docroot
 			let docrootFinal = $docroot;
 			if ($projectType !== 'php') {
-				// use docroot from project types defaults
 				if (projectTypeMappings[$projectType]?.docroot == null) {
 					console.error('No docroot found for projectType ', { $projectType });
 				} else {
@@ -169,66 +172,86 @@
 				databaseFinalCmd = `--database="${$databaseType}:${$databaseVersion}"`;
 			}
 
-			let generatedCommand = `mkdir ${$projectNameWithTimestamp} && \\
-cd ${$projectNameWithTimestamp}/ && \\
-ddev config \\
+			let generatedCommand = '';
+			generatedCommand = appendCommand(generatedCommand, `mkdir ${$projectNameWithTimestamp}`);
+			generatedCommand = appendCommand(generatedCommand, `cd ${$projectNameWithTimestamp}/`);
+			generatedCommand = appendCommand(
+				generatedCommand,
+				`ddev config \\
 	--project-type="${$projectType}" \\
 	--docroot="${docrootFinal}" \\
 	--php-version="${$phpVersion}" \\
 	${databaseFinalCmd} \\
 	--webserver-type=${$webserverType} \\
-	--nodejs-version="${nodejsVersionFinal}" \\\n`;
+	--nodejs-version="${nodejsVersionFinal}"`
+			);
 
 			if ($enableCorepack) {
-				generatedCommand += '--corepack-enable \\\n';
+				generatedCommand = appendCommand(generatedCommand, '--corepack-enable');
 			}
 			if ($disableSettingsManagement) {
-				generatedCommand += `--disable-settings-management \\\n`;
+				generatedCommand = appendCommand(generatedCommand, '--disable-settings-management');
 			}
 
-			generatedCommand += `&& ddev start -y && \\\n`;
+			generatedCommand = appendCommand(generatedCommand, 'ddev start -y');
 
-			// one command installs (if cms is selected)
 			if (selectedCms != null && selectedCms !== 'custom') {
 				switch (selectedCms) {
 					case 'craftcms':
-						generatedCommand += `ddev composer create -y --no-scripts --no-interaction "craftcms/craft:^5" && \\
-ddev craft install/craft \\
+						generatedCommand = appendCommand(
+							generatedCommand,
+							`ddev composer create -y --no-scripts --no-interaction "craftcms/craft:^5"`
+						);
+						generatedCommand = appendCommand(
+							generatedCommand,
+							`ddev craft install/craft \\
 	--username=admin \\
 	--password=password123 \\
 	--email=admin@example.com \\
 	--site-name=Testsite \\
 	--language=en \\
-	--site-url='$DDEV_PRIMARY_URL' && \\`;
+	--site-url='$DDEV_PRIMARY_URL'`
+						);
 						break;
 
 					case 'kirby':
-						generatedCommand += `ddev composer create getkirby/starterkit && \\`;
+						generatedCommand = appendCommand(
+							generatedCommand,
+							'ddev composer create getkirby/starterkit'
+						);
 						break;
 
 					case 'laravel':
-						generatedCommand += `ddev composer create --prefer-dist laravel/laravel:^11 && \\`;
+						generatedCommand = appendCommand(
+							generatedCommand,
+							'ddev composer create --prefer-dist laravel/laravel:^11'
+						);
 						break;
 
 					case 'typo3':
-						generatedCommand += `ddev composer create "typo3/cms-base-distribution:^12" && \\
-ddev exec ./vendor/bin/typo3 setup \\
-    --admin-username="admin" \\
-    --admin-user-password="password123" \\
-    --project-name="test" && \\`;
+						generatedCommand = appendCommand(
+							generatedCommand,
+							`ddev composer create "typo3/cms-base-distribution:^12"`
+						);
+						generatedCommand = appendCommand(
+							generatedCommand,
+							`ddev exec ./vendor/bin/typo3 setup \\
+	--admin-username="admin" \\
+	--admin-user-password="password123" \\
+	--project-name="test"`
+						);
 						break;
 
 					default:
 						console.error('No install command found for ', { selectedCms });
 						break;
 				}
-
-				generatedCommand += `\n`;
 			}
 
-			generatedCommand += `ddev launch`;
+			generatedCommand = appendCommand(generatedCommand, 'ddev launch');
 
-			return generatedCommand;
+			// Remove the last && \\\n
+			return generatedCommand.slice(0, -5);
 		}
 	);
 </script>
