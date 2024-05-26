@@ -342,7 +342,7 @@
 					>Not every CMS needs its own project type, see <a
 						href="https://ddev.readthedocs.io/en/stable/users/quickstart/"
 						target="_blank">CMS Quickstarts</a
-					>.</small
+					> - for some 'php' is totally fine.</small
 				>
 			</p>
 			<div class="radio-group">
