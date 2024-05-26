@@ -20,6 +20,10 @@
 <div class="container">
 	<h1 style="text-align:center;margin-bottom:2rem;">Project configurator</h1>
 
+	<p style="text-align:center;margin-bottom:1.75rem;font-size:0.9rem;">
+		Select "custom config" to define your own config - or select a framework / CMS.
+	</p>
+
 	<CmsSelector on:selectedCmsChange={handleCmsChange} />
 
 	<!-- {JSON.stringify(selectedCms)} -->
