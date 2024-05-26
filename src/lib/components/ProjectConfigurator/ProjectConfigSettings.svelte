@@ -139,6 +139,8 @@
 			$enableCorepack,
 			$disableSettingsManagement
 		]) => {
+			console.log('regenerate bash command', $projectType);
+
 			const nodejsVersionFinal =
 				$nodejsVersion === 'custom' ? $customNodejsVersion : $nodejsVersion;
 
@@ -148,6 +150,9 @@
 				// use docroot from project types defaults
 				if (projectTypeMappings[$projectType]?.docroot == null) {
 					console.error('No docroot found for projectType ', { $projectType });
+				} else {
+					console.log(projectTypeMappings[$projectType].docroot);
+					docrootFinal = projectTypeMappings[$projectType].docroot;
 				}
 			}
 
