@@ -261,6 +261,15 @@
 							generatedCommand,
 							'ddev composer create --prefer-dist laravel/laravel:^11'
 						);
+
+						// special case: SQlite, --disable-settings-management is preferred
+						if ($disableSettingsManagement === true) {
+							generatedCommand = appendCommand(generatedCommand, 'ddev cp .env.example .env');
+							generatedCommand = appendCommand(generatedCommand, 'ddev artisan key:generate');
+							// TODO: has a yes/no confirmation
+							generatedCommand = appendCommand(generatedCommand, 'ddev artisan migrate');
+						}
+
 						break;
 
 					case 'typo3':
@@ -268,6 +277,7 @@
 							generatedCommand,
 							`ddev composer create "typo3/cms-base-distribution:^12"`
 						);
+						// TODO: some more args needed
 						generatedCommand = appendCommand(
 							generatedCommand,
 							`ddev exec ./vendor/bin/typo3 setup \\
