@@ -19,6 +19,7 @@ npm run dev
 
 ## TODOs
 
+- [ ] Add more CMSes
 - [ ] Mobile optimization
 - [ ] Type safety
 - [ ] Add url params to share a link to every page?
