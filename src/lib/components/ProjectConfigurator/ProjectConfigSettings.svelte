@@ -179,6 +179,8 @@
 		]) => {
 			console.log('[ProjectConfigSettings.svelte] Regenerate bash command triggered');
 
+			// prepare some variables
+
 			const nodejsVersionFinal =
 				$nodejsVersion === 'custom' ? $customNodejsVersion : $nodejsVersion;
 
@@ -198,27 +200,34 @@
 				databaseFinalCmd = `--database="${$databaseType}:${$databaseVersion}"`;
 			}
 
+			// our output command
 			let generatedCommand = '';
+
+			// create folder, switch to it
 			generatedCommand = appendCommand(generatedCommand, `mkdir ${$projectNameWithTimestamp}`);
 			generatedCommand = appendCommand(generatedCommand, `cd ${$projectNameWithTimestamp}/`);
-			generatedCommand = appendCommand(
-				generatedCommand,
-				`ddev config \\
+
+			// ddev config command has some optional arg flags
+			// TODO: find a better way to do this with optional flags
+			let tmpBaseCommand = `ddev config \\
 	--project-type="${$projectType}" \\
 	--docroot="${docrootFinal}" \\
 	--php-version="${$phpVersion}" \\
 	${databaseFinalCmd} \\
 	--webserver-type=${$webserverType} \\
-	--nodejs-version="${nodejsVersionFinal}"`
-			);
+	--nodejs-version="${nodejsVersionFinal}"`;
 
 			if ($enableCorepack) {
-				generatedCommand = appendCommand(generatedCommand, '--corepack-enable');
+				tmpBaseCommand += `\\\n\t--corepack-enable `;
 			}
 			if ($disableSettingsManagement) {
-				generatedCommand = appendCommand(generatedCommand, '--disable-settings-management');
+				tmpBaseCommand += `\\\n\t--disable-settings-management`;
 			}
 
+			// append ddev config command
+			generatedCommand = appendCommand(generatedCommand, tmpBaseCommand);
+
+			// append ddev start
 			generatedCommand = appendCommand(generatedCommand, 'ddev start -y');
 
 			if (selectedCms != null && selectedCms !== 'custom') {
@@ -276,8 +285,11 @@
 
 			generatedCommand = appendCommand(generatedCommand, 'ddev launch');
 
+			console.log('Raw generated command', { generatedCommand });
+
+			// TODO: find a better solution for this! use .trim()?
 			// Remove the last && \\\n
-			return generatedCommand.slice(0, -5);
+			return generatedCommand.slice(0, -6);
 		}
 	);
 </script>
