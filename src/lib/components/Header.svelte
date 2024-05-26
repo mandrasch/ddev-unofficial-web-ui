@@ -4,7 +4,8 @@
 
 <header>
 	<div class="header-inner">
-		<div class="logo-with-subline">
+		<!-- force full reload on click to let user reset the form -->
+		<div class="logo-with-subline" data-sveltekit-reload>
 			<a href="/" class="logo-container">
 				<img src="/ddev.svg" alt="" />
 			</a>
