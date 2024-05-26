@@ -13,7 +13,12 @@
 	export let selectedCms = null;
 	// Watch for changes in selectedCms prop from outside
 	$: {
-		console.log('Selected CMS changed from outside / onMount', selectedCms);
+		console.log('Selected CMS changed from outside', selectedCms);
+
+		// Reset defaults when another CMS is selected, user might have changed a lot of settings
+		resetDefaults();
+
+		// Set project type according to new selected CMS, add some recommended defaults
 		if (selectedCms) {
 			switch (selectedCms) {
 				case 'custom':
@@ -81,6 +86,21 @@
 	const customNodejsVersion = writable('');
 	const enableCorepack = writable(false);
 	const disableSettingsManagement = writable(false);
+
+	// Define a function to reset all defaults, needed when user changed a lot
+	// and another CMS is selected
+	function resetDefaults() {
+		projectType.set('php');
+		docroot.set('');
+		phpVersion.set('8.2');
+		databaseType.set('mysql');
+		databaseVersion.set('8.0');
+		webserverType.set('nginx-fpm');
+		nodejsVersion.set('20.3.1');
+		customNodejsVersion.set('');
+		enableCorepack.set(false);
+		disableSettingsManagement.set(false);
+	}
 
 	// Reactive statement to update the database version based on the selected type
 	$: {
