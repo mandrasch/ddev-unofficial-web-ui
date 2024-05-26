@@ -17,10 +17,16 @@ npm i
 npm run dev
 ```
 
+Beware: Some code provided by ChatGPT
+
 ## TODOs
 
-- [ ] Add more CMSes
-- [ ] Mobile optimization
+- [ ] Mobile optimization ⚠️
+- [ ] Accessibility check ⚠️
+- [ ] Add all CMSes
+- [ ] Quality Check for ChatGPT-generated code 🤖
 - [ ] Type safety
 - [ ] Add url params to share a link to every page?
-- [ ] Add CMS versions for one command installs?
+- [ ] Add specific CMS version selector install commands?
+- [ ] Add filter field for CMS selector?
+- [ ] Use human readable date format for timestamp

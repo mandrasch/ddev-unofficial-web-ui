@@ -32,7 +32,6 @@
 </script>
 
 <div class="form-inner">
-	<h2 style="text-align:center;margin-bottom:2rem;">Project configurator</h2>
 	<div class="cms-grid">
 		{#each cmsTypes as cms}
 			<label class="cms-item">
@@ -45,8 +44,9 @@
 					aria-checked={$selectedCms === cms.id}
 					aria-label={cms.title}
 				/>
-
-				<img src={`/logos/${cms.src}`} alt="" />
+				<div class="img-wrapper">
+					<img src={`/logos/${cms.src}`} alt="" />
+				</div>
 			</label>
 		{/each}
 	</div>
@@ -74,16 +74,21 @@
 		height: 100%;
 		cursor: pointer;
 	}
-
+	.img-wrapper {
+		width: 100%;
+		height: 100%;
+		padding: 20px; /* Add padding around the image */
+		box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
+		border: 2px solid #cddbf7;
+	}
 	.cms-item img {
 		width: 100%;
 		height: 100%;
-
 		object-fit: contain;
-		border: 2px solid #cddbf7;
+
 		transition: border-color 0.3s;
 	}
-	.cms-item input[type='radio']:checked + img {
+	.cms-item input[type='radio']:checked + .img-wrapper {
 		border-color: #007bff;
 	}
 </style>

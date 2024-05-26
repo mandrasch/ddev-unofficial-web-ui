@@ -11,6 +11,8 @@
 </script>
 
 <div class="container">
+	<h1 style="text-align:center;margin-bottom:2rem;">Project configurator</h1>
+
 	<CmsSelector on:selectedCmsChange={handleCmsChange} />
 
 	<!-- {JSON.stringify(selectedCms)} -->
