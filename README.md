@@ -27,6 +27,7 @@ Beware: Some code provided by ChatGPT
 - [ ] ⚠️ Accessibility check
 - [ ] ⚠️ Add warning when user switches CMS --> resets to defaults
 - [ ] Convert to static site project, no need for SSR
+- [ ] Copy to clipboard button
 - [ ] Quality Check for ChatGPT-generated code 🤖
 - [ ] Is `writable`neeeded after all?
 - [ ] TYPO3 not fully automated yet (webserver is asked)

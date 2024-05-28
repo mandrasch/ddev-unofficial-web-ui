@@ -1,0 +1,58 @@
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - main
+    # Sustainability: Don't trigger build for updated README
+    paths-ignore:
+      - '**/README.md'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+      - name: Use Node LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.13.1' # lts
+
+      # This build runs with path prefix for github pages (hosted on subdirectory),
+      # for example https://<USER>.github.io/<REPO-NAME>/
+      # See: https://www.11ty.dev/docs/config/#deploy-to-a-subdirectory-with-a-path-prefix
+      # - name: Install and Build for Github Pages 🔧
+      #   run: |
+      #     npm ci
+      #     npm run build
+      #   env:
+      #     # https://vitepress.vuejs.org/config/basics.html#base
+      #     BASE_PATH: "/${{ github.event.repository.name }}/"
+
+      # Important > GitHub repo > settings > Actions -->
+      # Allow read AND write for Github Action token, otherwise this will result in a error (as deploy action tries to push)
+      # See https://github.com/JamesIves/github-pages-deploy-action/discussions/1104#discussioncomment-2678741
+      # - name: Deploy 🚀
+      #   uses: JamesIves/github-pages-deploy-action@v4.3.3
+      #   with:
+      #     branch: gh-pages # The branch the action should deploy to.
+      #     folder: docs/.vitepress/dist # The folder the action should deploy.
+
+      - name: Install and Build 🔧
+        run: |
+          npm ci
+          npm run build
+          ls -lsa
+
+      # transfer to webspace
+      - name: rsync deployments
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          # be careful with delete! --delete
+          switches: -avzr
+          path: build/
+          # e.g. /var/www/html/<my-project>
+          remote_path: '/home/sites/${{ secrets.SSH_ACCOUNT_ID }}/web/ddev-unofficial-web-ui.mandrasch.eu/'
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
