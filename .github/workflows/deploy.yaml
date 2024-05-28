@@ -48,8 +48,8 @@ jobs:
       - name: rsync deployments
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          # be careful with delete! --delete
-          switches: -avzr
+          # be careful with delete!
+          switches: -avzr --delete
           path: build/
           # e.g. /var/www/html/<my-project>
           remote_path: '/home/sites/${{ secrets.SSH_ACCOUNT_ID }}/web/ddev-unofficial-web-ui.mandrasch.eu/'

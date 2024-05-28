@@ -2,7 +2,7 @@
 
 🚧 Disclaimer: Early preview of a private project, work in progress 🚧
 
-Preview: https://ddev-unofficial-web-ui.vercel.app
+Preview: https://ddev-unofficial-web-ui.mandrasch.eu/
 
 Usage in DDEV:
 
