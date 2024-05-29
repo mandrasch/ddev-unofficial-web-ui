@@ -25,10 +25,21 @@
 				case 'custom':
 					projectType.set('php');
 					break;
-
+				case 'cakephp':
+					projectType.set(selectedCms);
+					phpVersion.set('8.2'); // TODO: recommended?
+					databaseType.set('mysql');
+					databaseVersion.set('8.0');
+					break;
 				case 'craftcms':
 					projectType.set(selectedCms);
 					phpVersion.set('8.2');
+					databaseType.set('mysql');
+					databaseVersion.set('8.0');
+					break;
+				case 'drupal':
+					projectType.set(selectedCms);
+					phpVersion.set('8.3');
 					databaseType.set('mysql');
 					databaseVersion.set('8.0');
 					break;
@@ -43,7 +54,25 @@
 					databaseType.set('mysql');
 					databaseVersion.set('8.0');
 					break;
+				case 'statamic':
+					projectType.set('laravel');
+					phpVersion.set('8.2');
+					databaseType.set('none');
+					break;
+				case 'symfony':
+					projectType.set('php');
+					docroot.set('public');
+					phpVersion.set('8.2');
+					databaseType.set('mysql');
+					databaseVersion.set('8.0');
+					break;
 				case 'typo3':
+					projectType.set(selectedCms);
+					phpVersion.set('8.2');
+					databaseType.set('mysql');
+					databaseVersion.set('8.0');
+					break;
+				case 'wordpress':
 					projectType.set(selectedCms);
 					phpVersion.set('8.2');
 					databaseType.set('mysql');
@@ -145,12 +174,33 @@
 	);
 
 	// Helper function which safely adds another command with line break after it
-	function appendCommand(command, line) {
-		return `${command}${line.trim()} && \\\n`;
+	/**
+	 * Append one or more lines to a command.
+	 *
+	 * @param {string} command - The current command string.
+	 * @param {string|string[]} lines - A line or array of lines to append to the command.
+	 * @returns {string} The updated command string.
+	 */
+	function appendCommand(command, lines) {
+		// Convert to array if lines is not already an array
+		if (!Array.isArray(lines)) {
+			lines = [lines];
+		}
+
+		// Append each line to the command
+		lines.forEach((line) => {
+			// Trim the line and check if it's not empty before appending
+			const trimmedLine = line.trim();
+			if (trimmedLine.length > 0) {
+				command += `${trimmedLine} && \\\n`;
+			}
+		});
+
+		return command;
 	}
 
 	// Derived store for the generated command
-	const generatedBashCommand = derived(
+	const finalBashCommandOutput = derived(
 		[
 			projectNameWithTimestamp,
 			projectType,
@@ -200,7 +250,7 @@
 				databaseFinalCmd = `--database="${$databaseType}:${$databaseVersion}"`;
 			}
 
-			// our output command
+			// our output command, working variable
 			let generatedCommand = '';
 
 			// create folder, switch to it
@@ -214,7 +264,7 @@
 	--docroot="${docrootFinal}" \\
 	--php-version="${$phpVersion}" \\
 	${databaseFinalCmd} \\
-	--webserver-type=${$webserverType} \\
+	--webserver-type="${$webserverType}" \\
 	--nodejs-version="${nodejsVersionFinal}"`;
 
 			if ($enableCorepack) {
@@ -230,15 +280,18 @@
 			// append ddev start
 			generatedCommand = appendCommand(generatedCommand, 'ddev start -y');
 
+			// TODO: Can this be added to generalized config? function? What about special cases?
 			if (selectedCms != null && selectedCms !== 'custom') {
 				switch (selectedCms) {
+					case 'cakephp':
+						generatedCommand = appendCommand(generatedCommand, [
+							`ddev composer create --prefer-dist cakephp/app:~5.0`,
+							`ddev cake`
+						]);
+						break;
 					case 'craftcms':
-						generatedCommand = appendCommand(
-							generatedCommand,
-							`ddev composer create -y --no-scripts --no-interaction "craftcms/craft:^5"`
-						);
-						generatedCommand = appendCommand(
-							generatedCommand,
+						generatedCommand = appendCommand(generatedCommand, [
+							`ddev composer create -y --no-scripts --no-interaction "craftcms/craft:^5"`,
 							`ddev craft install/craft \\
 	--username=admin \\
 	--password=password123 \\
@@ -246,7 +299,17 @@
 	--site-name=Testsite \\
 	--language=en \\
 	--site-url='$DDEV_PRIMARY_URL'`
-						);
+						]);
+						break;
+
+					case 'drupal':
+						generatedCommand = appendCommand(generatedCommand, [
+							`ddev composer create drupal/recommended-project:^10`,
+							`ddev config --update`,
+							`ddev composer require drush/drush`,
+							`ddev drush site:install --account-name=admin --account-pass=admin -y`,
+							`ddev drush uli`
+						]);
 						break;
 
 					case 'kirby':
@@ -264,28 +327,45 @@
 
 						// special case: SQlite, --disable-settings-management is preferred
 						if ($disableSettingsManagement === true) {
-							generatedCommand = appendCommand(generatedCommand, 'ddev cp .env.example .env');
-							generatedCommand = appendCommand(generatedCommand, 'ddev artisan key:generate');
-							// TODO: has a yes/no confirmation
-							generatedCommand = appendCommand(generatedCommand, 'ddev artisan migrate');
+							generatedCommand = appendCommand(generatedCommand, [
+								'ddev cp .env.example .env',
+								'ddev artisan key:generate',
+								// TODO: has a yes/no confirmation
+								'ddev artisan migrate'
+							]);
 						}
 
 						break;
+					case 'statamic':
+						generatedCommand = appendCommand(generatedCommand, [
+							`ddev composer create --prefer-dist statamic/statamic`,
+							`ddev php please make:user`
+						]);
+						break;
+
+					// TODO: # When it asks if you want to include docker configuration, say "no" with "x" --> automate it?
+					case 'symfony':
+						generatedCommand = appendCommand(generatedCommand, [
+							`ddev composer create symfony/skeleton:"7.0.*"`,
+							`ddev composer require webapp`
+						]);
+						break;
 
 					case 'typo3':
-						generatedCommand = appendCommand(
-							generatedCommand,
-							`ddev composer create "typo3/cms-base-distribution:^12"`
-						);
-						// TODO: some more args needed
-						generatedCommand = appendCommand(
-							generatedCommand,
+						generatedCommand = appendCommand(generatedCommand, [
+							`ddev composer create "typo3/cms-base-distribution:^12"`,
 							`ddev exec ./vendor/bin/typo3 setup \\
 	--admin-username="admin" \\
 	--admin-user-password="password123" \\
 	--project-name="test"`
-						);
+						]);
 						break;
+
+					case 'wordpress':
+						generatedCommand = appendCommand(generatedCommand, [
+							`ddev wp core download`,
+							`dev wp core install --url='$DDEV_PRIMARY_URL' --title='New-WordPress' --admin_user=admin --admin_email=admin@example.com --prompt=admin_password`
+						]);
 
 					default:
 						console.error('No install command found for ', { selectedCms });
@@ -297,7 +377,7 @@
 
 			console.log('Raw generated command', { generatedCommand });
 
-			// TODO: find a better solution for this! use .trim()?
+			// TODO: find a better solution for this! use .trim() afterwards?
 			// Remove the last && \\\n
 			return generatedCommand.slice(0, -6);
 		}
@@ -310,7 +390,7 @@
 			<h2 style="text-align:center">Your config command</h2>
 			<!-- <div class="help-text">Paste this into your terminal:</div> -->
 			<div class="highlight-textarea-wrapper">
-				<Highlight language={bash} code={$generatedBashCommand} />
+				<Highlight language={bash} code={$finalBashCommandOutput} />
 			</div>
 			<!-- <div class="code-buttons">
 				<button>Copy to clipboard</button>

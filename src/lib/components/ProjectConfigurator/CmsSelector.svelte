@@ -13,10 +13,16 @@
 
 	const cmsTypes = [
 		{ id: 'custom', title: 'Custom config', src: 'custom.svg' },
+		{ id: 'cakephp', title: 'Cake PHP', src: 'cakephp.jpg' },
 		{ id: 'craftcms', title: 'Craft CMS', src: 'craftcms.svg' },
-		{ id: 'typo3', title: 'TYPO3', src: 'typo3.svg' },
+		{ id: 'drupal', title: 'Drupal', src: 'drupal.png' },
 		{ id: 'kirby', src: 'kirby.svg' },
-		{ id: 'laravel', src: 'laravel.svg' }
+		{ id: 'laravel', src: 'laravel.svg' },
+		{ id: 'statamic', title: 'Statamic', src: 'statamic.svg' },
+		{ id: 'symfony', title: 'Symfony', src: 'symfony.svg' },
+		{ id: 'typo3', title: 'TYPO3', src: 'typo3.svg' },
+		{ id: 'wordpress', title: 'WordPress', src: 'wordpress.png' }
+		// { id: 'backdrop', title: 'Backdrop', src: 'backdrop.png' }
 		// Add more cmss as needed
 	];
 
