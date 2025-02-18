@@ -76,14 +76,6 @@ export default defineConfig({
 			>.
 		</p>
 	</details>
-	<details>
-		<summary>How do I install DDEV?</summary>
-		<p>
-			It's pretty easy, just get started here: <a href="https://ddev.com/get-started/"
-				>Install and start using DDEV</a
-			>.
-		</p>
-	</details>
 
 	<details>
 		<summary>Gitpod support?</summary>
