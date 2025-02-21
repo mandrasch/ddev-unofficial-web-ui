@@ -30,7 +30,7 @@ export default defineConfig({
     // Defines the origin of the generated asset URLs during development
     origin: origin,
     cors: {
-	origin: { origin: process.env.DDEV_PRIMARY_URL },
+	origin: /https?:\/\/([A-Za-z0-9\-\.]+)?(\.ddev\.site)(?::\d+)?$/,
     },
   },
 
